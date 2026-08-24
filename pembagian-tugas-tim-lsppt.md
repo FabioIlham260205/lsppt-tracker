@@ -60,16 +60,7 @@
 - [ ] Setup environment variables
 
 ### UI Components
-- [ ] Button
-- [ ] Input
-- [ ] Select
-- [ ] DatePicker
-- [ ] Modal
-- [ ] Table
-- [ ] Badge
-- [ ] Toast
-- [ ] Loading
-- [ ] Empty State
+- j
 
 ### Submit LSPPT
 - [ ] Halaman `/submit`

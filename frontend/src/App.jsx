@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SubmitPage from './pages/SubmitPage.jsx';
 import HistoryPage from './pages/HistoryPage.jsx';
+import ComponentsPage from './pages/ComponentsPage.jsx';
+import { ToastProvider } from './components/ui';
 
 function NotFoundPage() {
   return (
@@ -15,14 +17,17 @@ function NotFoundPage() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/submit" replace />} />
-        <Route path="/submit" element={<SubmitPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/submit" replace />} />
+          <Route path="/submit" element={<SubmitPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/components" element={<ComponentsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 
