@@ -4,9 +4,9 @@
 
 | Anggota | Role | Fokus |
 |---|---|---|
-| Orang 1 | Backend Developer | NestJS, Prisma, PostgreSQL, API |
-| Orang 2 | Frontend Developer | React + Vite, Submit LSPPT, UI Components |
-| Orang 3 | Frontend Developer | React + Vite, History, Timeline, Testing |
+| Obit    | Backend Developer | NestJS, Prisma, PostgreSQL, API |
+| Fabio    | Frontend Developer | React + Vite, Submit LSPPT, UI Components |
+| Bagas   | Frontend Developer | React + Vite, History, Timeline, Testing |
 
 ## Orang 1 — Backend & Database
 
