@@ -129,7 +129,7 @@
 
 ## Pembagian Berdasarkan Phase
 
-| Phase | Orang 1 | Orang 2 | Orang 3 |
+| Phase | Obit | Fabio | Bagas |
 |---|:---:|:---:|:---:|
 | Project Setup | ✓ | ✓ | ✓ |
 | Docker Development | ✓ | ✓ | ✓ |
