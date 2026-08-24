@@ -8,7 +8,7 @@
 | Fabio    | Frontend Developer | React + Vite, Submit LSPPT, UI Components |
 | Bagas   | Frontend Developer | React + Vite, History, Timeline, Testing |
 
-## Orang 1 — Backend & Database
+## Obit  — Backend & Database
 
 ### Setup
 - [ ] Setup NestJS
@@ -49,7 +49,7 @@
 - [ ] Test seluruh API menggunakan Postman
 - [ ] Pastikan API sesuai API Contract
 
-## Orang 2 — Frontend Submit & UI Components
+## Fabio — Frontend Submit & UI Components
 
 ### Setup
 - [ ] Setup React + Vite
@@ -91,7 +91,7 @@
 - [ ] Integrasi `/phases`
 - [ ] Integrasi `/lsppt`
 
-## Orang 3 — Frontend History & Testing
+## Bagas — Frontend History & Testing
 
 ### History
 - [ ] Halaman `/history`
