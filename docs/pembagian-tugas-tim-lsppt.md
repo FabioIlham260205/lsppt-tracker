@@ -52,41 +52,43 @@
 ## Fabio — Frontend Submit & UI Components
 
 ### Setup
-- [ ] Setup React + Vite
-- [ ] Setup Tailwind CSS
-- [ ] Setup React Router
-- [ ] Setup Axios
-- [ ] Setup Docker frontend
-- [ ] Setup environment variables
+- [x] Setup React + Vite
+- [x] Setup Tailwind CSS
+- [x] Setup React Router
+- [x] Setup Axios
+- [x] Setup Docker frontend
+- [x] Setup environment variables
 
 ### UI Components
-- [ ] Button
-- [ ] Input
-- [ ] Select
-- [ ] DatePicker
-- [ ] Modal
-- [ ] Table
-- [ ] Badge
-- [ ] Toast
-- [ ] Loading
-- [ ] Empty State
+- [x] Button
+- [x] Input
+- [x] Select
+- [x] DatePicker
+- [x] Modal
+- [x] Table
+- [x] Badge
+- [x] Toast
+- [x] Loading
+- [x] Empty State
 
 ### Submit LSPPT
-- [ ] Halaman `/submit`
-- [ ] Employee dropdown
-- [ ] Date picker
-- [ ] Task Title
-- [ ] ClickUp URL
-- [ ] ClickUp Task ID
-- [ ] Phase dropdown
-- [ ] Dynamic Status dropdown
-- [ ] `+ Add Task`
-- [ ] Task list
-- [ ] Remove task
-- [ ] Save LSPPT
-- [ ] Success/error notification
+Harus Nunggu backend belum dirubah
+- [x] Halaman `/submit`
+- [x] Employee dropdown
+- [x] Date picker
+- [x] Task Title
+- [x] ClickUp URL
+- [x] ClickUp Task ID
+- [x] Phase dropdown
+- [x] Dynamic Status dropdown
+- [x] `+ Add Task`
+- [x] Task list
+- [x] Remove task
+- [x] Save LSPPT
+- [x] Success/error notification
 
 ### API Integration
+Nunggu Backend
 - [ ] Integrasi `/employees`
 - [ ] Integrasi `/phases`
 - [ ] Integrasi `/lsppt`
@@ -94,28 +96,28 @@
 ## Bagas — Frontend History & Testing
 
 ### History
-- [ ] Halaman `/history`
-- [ ] Employee filter
-- [ ] From date
-- [ ] To date
-- [ ] Search
-- [ ] History table
-- [ ] Loading state
-- [ ] Empty state
-- [ ] Error state
+- [x] Halaman `/history`
+- [x] Employee filter
+- [x] From date
+- [x] To date
+- [x] Search
+- [x] History table
+- [x] Loading state
+- [x] Empty state
+- [x] Error state
 
 ### Task Progress
-- [ ] Task clickable
-- [ ] Task detail
-- [ ] Progress timeline
-- [ ] Tampilkan perubahan Phase/Status per tanggal
-- [ ] Integrasi `/tasks/:id/history`
+- [x] Task clickable
+- [x] Task detail
+- [x] Progress timeline
+- [x] Tampilkan perubahan Phase/Status per tanggal
+- [x] Integrasi `/tasks/:id/history`
 
 ### Export
-- [ ] Tombol Export Excel
-- [ ] Kirim filter Employee & Date
-- [ ] Download file `.xlsx`
-- [ ] Integrasi `/history/export`
+- [x] Tombol Export Excel
+- [x] Kirim filter Employee & Date
+- [x] Download file `.xlsx`
+- [x] Integrasi `/history/export`
 
 ### Integration Testing
 - [ ] Test Submit → Database → History
