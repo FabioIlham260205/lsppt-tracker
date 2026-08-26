@@ -72,7 +72,6 @@
 - [x] Empty State
 
 ### Submit LSPPT
-Harus Nunggu backend belum dirubah
 - [x] Halaman `/submit`
 - [x] Employee dropdown
 - [x] Date picker
@@ -88,10 +87,10 @@ Harus Nunggu backend belum dirubah
 - [x] Success/error notification
 
 ### API Integration
-Nunggu Backend
-- [ ] Integrasi `/employees`
-- [ ] Integrasi `/phases`
-- [ ] Integrasi `/lsppt`
+
+- [x] Integrasi `/employees`
+- [x] Integrasi `/phases`
+- [x] Integrasi `/lsppt`
 
 ## Bagas — Frontend History & Testing
 

@@ -26,7 +26,7 @@ import {
   deleteEmployee,
 } from '../api/lsppt.js';
 
-const CLICKUP_ID_PATTERN = /\/t\/([a-z0-9]+)/i;
+const CLICKUP_ID_PATTERN = /\/([a-z0-9]+)\/?$/i;
 
 const EMPTY_TASK_FORM = {
   title: '',
@@ -469,7 +469,7 @@ export default function SubmitPage() {
             <p className="text-xs text-slate-500">
               {tasks.length > 0
                 ? `${tasks.length} task siap disimpan untuk ${date || 'tanggal terpilih'}`
-                : 'Data tersimpan hanya di sesi ini (mode mock).'}
+                : 'Belum ada task yang ditambahkan.'}
             </p>
             <Button type="button" size="lg" loading={saving} onClick={handleSave}>
               Save LSPPT
