@@ -29,4 +29,13 @@ export class TasksService {
       })),
     };
   }
+
+  async remove(id: number) {
+    const task = await this.prisma.task.findUnique({ where: { id } });
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+    await this.prisma.task.delete({ where: { id } });
+    return { message: 'Task deleted successfully' };
+  }
 }

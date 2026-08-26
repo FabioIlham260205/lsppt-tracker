@@ -25,7 +25,7 @@ model Task {
   clickupUrl    String? @map("clickup_url") @db.Text
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  employee Employee       @relation(fields: [employeeId], references: [id])
+  employee Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   progress TaskProgress[]
 
   @@unique([employeeId, clickupTaskId])
@@ -40,7 +40,7 @@ model TaskProgress {
   status    String   @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  task Task @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, date])
   @@index([date])
