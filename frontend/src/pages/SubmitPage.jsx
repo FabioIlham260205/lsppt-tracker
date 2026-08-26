@@ -116,6 +116,8 @@ export default function SubmitPage() {
 
   const validateTaskForm = () => {
     const errs = {};
+    if (!employeeId) errs.employeeId = 'Pilih karyawan';
+    if (!date) errs.date = 'Pilih tanggal';
     if (!taskForm.title.trim()) errs.title = 'Judul tugas wajib diisi';
 
     if (!taskForm.clickupUrl.trim()) errs.clickupUrl = 'ClickUp URL wajib diisi';
@@ -139,6 +141,7 @@ export default function SubmitPage() {
   const handleAddTask = () => {
     const errs = validateTaskForm();
     setRowErrors(errs);
+    setFormErrors({ employeeId: errs.employeeId, date: errs.date });
     if (Object.keys(errs).length > 0) return;
 
     setTasks((prev) => [
@@ -245,13 +248,13 @@ export default function SubmitPage() {
               placeholder="Pilih karyawan"
               options={employees.map((emp) => ({ value: emp.id, label: emp.name }))}
               value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
+              onChange={(e) => { setEmployeeId(e.target.value); setFormErrors((prev) => ({ ...prev, employeeId: undefined })); }}
               error={formErrors.employeeId}
             />
             <DatePicker
               label="Tanggal"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => { setDate(e.target.value); setFormErrors((prev) => ({ ...prev, date: undefined })); }}
               error={formErrors.date}
             />
           </div>
