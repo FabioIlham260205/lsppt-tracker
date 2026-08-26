@@ -54,3 +54,15 @@ export async function exportHistory({ employee_id, from, to } = {}) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+export function createEmployee(name) {
+  return request(api.post('/employees', { name }));
+}
+
+export function updateEmployee(id, name) {
+  return request(api.put(`/employees/${id}`, { name }));
+}
+
+export function deleteEmployee(id) {
+  return request(api.delete(`/employees/${id}`));
+}
