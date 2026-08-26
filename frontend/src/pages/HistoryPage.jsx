@@ -46,6 +46,13 @@ const DOT_FILL = {
   neutral: 'bg-slate-400',
 };
 
+const TIME_PERIODS = {
+  'minggu-ini': 'Minggu Ini',
+  'bulan-ini': 'Bulan Ini',
+  'tahun-ini': 'Tahun Ini',
+  'semua': 'Semua',
+};
+
 function toISODate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -59,6 +66,26 @@ function defaultRange() {
     from: toISODate(new Date(now.getFullYear(), now.getMonth(), 1)),
     to: toISODate(now),
   };
+}
+
+function getPeriodRange(period) {
+  const now = new Date();
+  switch (period) {
+    case 'minggu-ini': {
+      const dayOfWeek = now.getDay();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - dayOfWeek);
+      return { from: toISODate(startOfWeek), to: toISODate(now) };
+    }
+    case 'bulan-ini':
+      return { from: toISODate(new Date(now.getFullYear(), now.getMonth(), 1)), to: toISODate(now) };
+    case 'tahun-ini':
+      return { from: toISODate(new Date(now.getFullYear(), 0, 1)), to: toISODate(now) };
+    case 'semua':
+      return { from: '', to: '' };
+    default:
+      return defaultRange();
+  }
 }
 
 const DATE_FMT = new Intl.DateTimeFormat('id-ID', {
@@ -231,6 +258,7 @@ export default function HistoryPage() {
   const [to, setTo] = useState(initialRange.to);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [activePeriod, setActivePeriod] = useState('bulan-ini');
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -255,7 +283,7 @@ export default function HistoryPage() {
   function loadHistory() {
     setLoading(true);
     setError(null);
-    getHistory({ employee_id: employeeId || undefined, from, to })
+    getHistory({ employee_id: employeeId || undefined, from: from || undefined, to: to || undefined })
       .then((res) => setRows(res.data))
       .catch((err) => setError(err?.message || 'Terjadi kesalahan tak terduga.'))
       .finally(() => setLoading(false));
@@ -294,6 +322,7 @@ export default function HistoryPage() {
   const hasActiveFilter =
     Boolean(employeeId) ||
     Boolean(search.trim()) ||
+    activePeriod !== 'bulan-ini' ||
     from !== initialRange.from ||
     to !== initialRange.to;
 
@@ -301,8 +330,16 @@ export default function HistoryPage() {
     setEmployeeId('');
     setSearch('');
     setDebouncedSearch('');
+    setActivePeriod('bulan-ini');
     setFrom(initialRange.from);
     setTo(initialRange.to);
+  }
+
+  function handlePeriodChange(period) {
+    setActivePeriod(period);
+    const range = getPeriodRange(period);
+    setFrom(range.from);
+    setTo(range.to);
   }
 
   function openDetail(row) {
@@ -316,7 +353,7 @@ export default function HistoryPage() {
 
   function handleExport() {
     setExporting(true);
-    exportHistory({ employee_id: employeeId || undefined, from, to })
+    exportHistory({ employee_id: employeeId || undefined, from: from || undefined, to: to || undefined })
       .then(() => {
         showToast({ type: 'success', title: 'Ekspor selesai', message: 'File berhasil diunduh.' });
       })
@@ -353,14 +390,20 @@ export default function HistoryPage() {
             <DatePicker
               label="Dari Tanggal"
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => {
+                setFrom(e.target.value);
+                setActivePeriod('custom');
+              }}
               max={to || undefined}
               error={dateInvalid ? 'Lebih besar dari tanggal akhir' : undefined}
             />
             <DatePicker
               label="Sampai Tanggal"
               value={to}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => {
+                setTo(e.target.value);
+                setActivePeriod('custom');
+              }}
               min={from || undefined}
               error={dateInvalid ? 'Lebih kecil dari tanggal mulai' : undefined}
             />
@@ -386,11 +429,25 @@ export default function HistoryPage() {
                 {filtered.length} entri ditemukan
               </p>
               <div className="flex items-center gap-2">
-                {(from || to) && (
-                  <p className="hidden text-xs text-slate-400 sm:block">
-                    Rentang: {formatDate(from)} – {formatDate(to)}
-                  </p>
-                )}
+                <div className="hidden sm:flex items-center gap-1 rounded-lg bg-slate-100 p-1">
+                  {Object.entries(TIME_PERIODS).map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => handlePeriodChange(key)}
+                      className={`rounded-md px-3 py-1 text-xs font-medium text-center min-w-[72px] transition-colors ${
+                        activePeriod === key
+                          ? 'bg-white text-slate-800 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className={`hidden text-xs text-slate-400 lg:block min-w-[140px] text-right ${!(from || to) && 'invisible'}`}>
+                  {from || to ? `${formatDate(from)} – ${formatDate(to)}` : '\u00A0'}
+                </p>
                 <Button
                   size="sm"
                   variant="outline"
