@@ -1,0 +1,466 @@
+openapi: 3.0.3
+info:
+  title: LSPPT API
+  description: >
+    Employee Daily Task Progress Tracking API (LSPPT MVP).
+    Sumber kebenaran adalah `api-contract-lsppt.md`. Jika ada perubahan endpoint
+    atau format JSON, update contract terlebih dahulu, lalu perbarui file ini.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Development (Docker Compose)
+tags:
+  - name: Employees
+    description: Daftar karyawan
+  - name: Phases & Status
+    description: Master phase dan status yang valid
+  - name: Submit
+    description: Submit LSPPT harian
+  - name: History
+    description: Riwayat progress & export Excel
+  - name: Tasks
+    description: Riwayat progress satu task
+
+paths:
+  /employees:
+    get:
+      tags: [Employees]
+      operationId: listEmployees
+      summary: List karyawan
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Employee'
+              example:
+                data:
+                  - id: 1
+                    name: Geta
+                  - id: 2
+                    name: Arifin
+                  - id: 3
+                    name: Lundy
+
+  /phases:
+    get:
+      tags: [Phases & Status]
+      operationId: listPhases
+      summary: List Phase & Status
+      description: Status wajib sesuai phase yang dipilih.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PhaseStatusMap'
+              example:
+                data:
+                  TS:
+                    - Completed
+                    - Documentation
+                    - On Hold
+                    - In Progress
+                    - Plan
+                  QA:
+                    - Completed
+                    - Completed Testing
+                    - Completed with Feedback
+                    - Testing
+                    - On Queue Testing
+                    - Plan
+
+  /lsppt:
+    post:
+      tags: [Submit]
+      operationId: submitLsppt
+      summary: Submit LSPPT
+      description: >
+        Simpan progress harian untuk satu atau banyak task.
+        Seluruh task diproses dalam satu transaksi — jika satu gagal,
+        semuanya dibatalkan.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLspptRequest'
+            example:
+              employee_id: 1
+              date: '2026-08-21'
+              tasks:
+                - title: CTMS - Issue List Report
+                  clickup_url: https://app.clickup.com/t/86d43h365
+                  clickup_task_id: 86d43h365
+                  phase: QA
+                  status: Testing
+      responses:
+        '201':
+          description: LSPPT tersimpan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: LSPPT saved successfully
+        '400':
+          description: |
+            Validasi gagal, antara lain:
+            - Body/format tidak valid (DTO validation)
+            - `Invalid status for phase` (status tidak sesuai phase)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidPhaseStatus:
+                  value:
+                    message: Invalid status for phase
+                invalidBody:
+                  value:
+                    message: employee_id must be an integer number; tasks should not be empty
+        '404':
+          description: Employee tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Employee not found
+        '409':
+          description: Duplicate task pada tanggal yang sama
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Duplicate task progress for the same date
+
+  /history:
+    get:
+      tags: [History]
+      operationId: listHistory
+      summary: History progress
+      description: Semua filter opsional dan dapat dikombinasikan.
+      parameters:
+        - $ref: '#/components/parameters/EmployeeIdQuery'
+        - $ref: '#/components/parameters/FromDateQuery'
+        - $ref: '#/components/parameters/ToDateQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HistoryItem'
+              example:
+                data:
+                  - id: 3
+                    task_id: 1
+                    employee: Geta
+                    date: '2026-08-22'
+                    task: CTMS - Issue List Report
+                    clickup_task_id: 86d43h365
+                    phase: QA
+                    status: Testing
+                  - id: 1
+                    task_id: 1
+                    employee: Geta
+                    date: '2026-08-21'
+                    task: CTMS - Issue List Report
+                    clickup_task_id: 86d43h365
+                    phase: QA
+                    status: Plan
+        '400':
+          description: Format query filter tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: from must be a valid date in YYYY-MM-DD format
+
+  /tasks/{id}/history:
+    get:
+      tags: [Tasks]
+      operationId: getTaskHistory
+      summary: History satu task
+      description: Timeline progress satu task, diurutkan berdasarkan tanggal menaik.
+      parameters:
+        - $ref: '#/components/parameters/TaskIdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskProgressEntry'
+              example:
+                data:
+                  - date: '2026-08-21'
+                    phase: QA
+                    status: Plan
+                  - date: '2026-08-22'
+                    phase: QA
+                    status: Testing
+                  - date: '2026-08-23'
+                    phase: QA
+                    status: Completed Testing
+        '404':
+          description: Task tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Task not found
+
+  /history/export:
+    get:
+      tags: [History]
+      operationId: exportHistory
+      summary: Export history ke Excel (.xlsx)
+      description: >
+        Filter sama dengan endpoint `/history`. Response berupa file binary
+        `.xlsx` dengan kolom Employee, Date, Task, ClickUp ID, ClickUp URL,
+        Phase, Status. Gunakan "Send and Download" pada Apidog agar file tersimpan.
+      parameters:
+        - $ref: '#/components/parameters/EmployeeIdQuery'
+        - $ref: '#/components/parameters/FromDateQuery'
+        - $ref: '#/components/parameters/ToDateQuery'
+      responses:
+        '200':
+          description: File Excel (.xlsx)
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: attachment; filename="lsppt-history.xlsx"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+components:
+  parameters:
+    EmployeeIdQuery:
+      name: employee_id
+      in: query
+      required: false
+      description: Filter berdasarkan ID karyawan
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    FromDateQuery:
+      name: from
+      in: query
+      required: false
+      description: Tanggal mulai (inklusif), format YYYY-MM-DD
+      schema:
+        type: string
+        format: date
+      example: '2026-08-01'
+    ToDateQuery:
+      name: to
+      in: query
+      required: false
+      description: Tanggal akhir (inklusif), format YYYY-MM-DD
+      schema:
+        type: string
+        format: date
+      example: '2026-08-31'
+    TaskIdPath:
+      name: id
+      in: path
+      required: true
+      description: ID task
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  schemas:
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          maxLength: 100
+          example: Geta
+
+    TsStatus:
+      type: string
+      enum:
+        - Completed
+        - Documentation
+        - On Hold
+        - In Progress
+        - Plan
+
+    QaStatus:
+      type: string
+      enum:
+        - Completed
+        - Completed Testing
+        - Completed with Feedback
+        - Testing
+        - On Queue Testing
+        - Plan
+
+    PhaseStatusMap:
+      type: object
+      properties:
+        TS:
+          type: array
+          items:
+            $ref: '#/components/schemas/TsStatus'
+        QA:
+          type: array
+          items:
+            $ref: '#/components/schemas/QaStatus'
+
+    LspptTaskInput:
+      type: object
+      required:
+        - title
+        - phase
+        - status
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          example: CTMS - Issue List Report
+        clickup_url:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: https://app.clickup.com/t/86d43h365
+        clickup_task_id:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: >
+            Jika diisi, pencocokan task lama memakai (employee_id, clickup_task_id).
+            Jika kosong, dicocokkan dengan (employee_id, title).
+          example: 86d43h365
+        phase:
+          type: string
+          enum: [TS, QA]
+          example: QA
+        status:
+          type: string
+          maxLength: 50
+          description: Wajib salah satu status yang valid untuk phase terkait.
+          example: Testing
+
+    CreateLspptRequest:
+      type: object
+      required:
+        - employee_id
+        - date
+        - tasks
+      properties:
+        employee_id:
+          type: integer
+          minimum: 1
+          example: 1
+        date:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: '2026-08-21'
+        tasks:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/LspptTaskInput'
+
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: LSPPT saved successfully
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: Invalid status for phase
+
+    HistoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID task_progress
+          example: 1
+        task_id:
+          type: integer
+          example: 1
+        employee:
+          type: string
+          example: Geta
+        date:
+          type: string
+          format: date
+          example: '2026-08-21'
+        task:
+          type: string
+          example: CTMS - Issue List Report
+        clickup_task_id:
+          type: string
+          nullable: true
+          example: 86d43h365
+        phase:
+          type: string
+          example: QA
+        status:
+          type: string
+          example: Plan
+
+    TaskProgressEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-08-21'
+        phase:
+          type: string
+          example: QA
+        status:
+          type: string
+          example: Plan
