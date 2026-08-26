@@ -16,7 +16,7 @@ import {
   Tr,
   useToast,
 } from '../components/ui';
-import { getEmployees, getHistory, getTaskHistory, exportHistory } from '../api/mock';
+import { getEmployees, getHistory, getTaskHistory, exportHistory } from '../api/lsppt';
 
 const STATUS_VARIANT = {
   Completed: 'success',
@@ -255,7 +255,7 @@ export default function HistoryPage() {
   function loadHistory() {
     setLoading(true);
     setError(null);
-    getHistory()
+    getHistory({ employee_id: employeeId || undefined, from, to })
       .then((res) => setRows(res.data))
       .catch((err) => setError(err?.message || 'Terjadi kesalahan tak terduga.'))
       .finally(() => setLoading(false));
@@ -263,7 +263,8 @@ export default function HistoryPage() {
 
   useEffect(() => {
     loadHistory();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employeeId, from, to]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
