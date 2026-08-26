@@ -52,32 +52,43 @@
 ## Fabio — Frontend Submit & UI Components
 
 ### Setup
-- [ ] Setup React + Vite
-- [ ] Setup Tailwind CSS
-- [ ] Setup React Router
-- [ ] Setup Axios
-- [ ] Setup Docker frontend
-- [ ] Setup environment variables
+- [x] Setup React + Vite
+- [x] Setup Tailwind CSS
+- [x] Setup React Router
+- [x] Setup Axios
+- [x] Setup Docker frontend
+- [x] Setup environment variables
 
 ### UI Components
-- j
+- [x] Button
+- [x] Input
+- [x] Select
+- [x] DatePicker
+- [x] Modal
+- [x] Table
+- [x] Badge
+- [x] Toast
+- [x] Loading
+- [x] Empty State
 
 ### Submit LSPPT
-- [ ] Halaman `/submit`
-- [ ] Employee dropdown
-- [ ] Date picker
-- [ ] Task Title
-- [ ] ClickUp URL
-- [ ] ClickUp Task ID
-- [ ] Phase dropdown
-- [ ] Dynamic Status dropdown
-- [ ] `+ Add Task`
-- [ ] Task list
-- [ ] Remove task
-- [ ] Save LSPPT
-- [ ] Success/error notification
+Harus Nunggu backend belum dirubah
+- [x] Halaman `/submit`
+- [x] Employee dropdown
+- [x] Date picker
+- [x] Task Title
+- [x] ClickUp URL
+- [x] ClickUp Task ID
+- [x] Phase dropdown
+- [x] Dynamic Status dropdown
+- [x] `+ Add Task`
+- [x] Task list
+- [x] Remove task
+- [x] Save LSPPT
+- [x] Success/error notification
 
 ### API Integration
+Nunggu Backend
 - [ ] Integrasi `/employees`
 - [ ] Integrasi `/phases`
 - [ ] Integrasi `/lsppt`
