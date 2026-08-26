@@ -197,7 +197,7 @@ export default function SubmitPage() {
 
     if (!taskForm.clickupUrl.trim()) errs.clickupUrl = 'ClickUp URL wajib diisi';
     else if (!extractClickUpId(taskForm.clickupUrl.trim()))
-      errs.clickupUrl = 'Format URL tidak valid (contoh: https://app.clickup.com/t/86d43h365)';
+      errs.clickupUrl = 'Format URL tidak valid (contoh: https://app.clickup.com/t/9003006723/86d41c8ur)';
 
     if (!taskForm.clickupTaskId.trim()) errs.clickupTaskId = 'ClickUp Task ID wajib diisi';
     else if (
@@ -360,7 +360,7 @@ export default function SubmitPage() {
             <Input
               label="ClickUp URL"
               type="url"
-              placeholder="https://app.clickup.com/t/86d43h365"
+              placeholder="https://app.clickup.com/t/9003006723/86d41c8ur"
               value={taskForm.clickupUrl}
               onChange={handleTaskFormChange('clickupUrl')}
               error={rowErrors.clickupUrl}
