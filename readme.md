@@ -1,0 +1,1 @@
+# docker compose -f docker-compose.dev.yml exec backend npx prisma migrate reset --force && docker compose -f docker-compose.dev.yml exec backend npx prisma db seed
