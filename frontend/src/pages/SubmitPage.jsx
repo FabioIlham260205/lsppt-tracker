@@ -7,6 +7,7 @@ import {
   EmptyState,
   Input,
   Loading,
+  Modal,
   Select,
   Table,
   TBody,
@@ -16,7 +17,14 @@ import {
   Tr,
   useToast,
 } from '../components/ui';
-import { getEmployees, getPhases, saveLsppt } from '../api/lsppt.js';
+import {
+  getEmployees,
+  getPhases,
+  saveLsppt,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
+} from '../api/lsppt.js';
 
 const CLICKUP_ID_PATTERN = /\/t\/([a-z0-9]+)/i;
 
@@ -59,6 +67,12 @@ export default function SubmitPage() {
   const [tasks, setTasks] = useState([]);
   const [saving, setSaving] = useState(false);
 
+  const [empModalOpen, setEmpModalOpen] = useState(false);
+  const [empView, setEmpView] = useState('list');
+  const [empEditId, setEmpEditId] = useState(null);
+  const [empName, setEmpName] = useState('');
+  const [empSaving, setEmpSaving] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
     Promise.all([getEmployees(), getPhases()])
@@ -82,6 +96,69 @@ export default function SubmitPage() {
       cancelled = true;
     };
   }, [showToast]);
+
+  const loadEmployees = () => {
+    getEmployees()
+      .then((res) => setEmployees(res.data))
+      .catch(() => {});
+  };
+
+  const openEmpModal = () => {
+    setEmpView('list');
+    setEmpEditId(null);
+    setEmpName('');
+    setEmpModalOpen(true);
+  };
+
+  const handleEmpCreate = async () => {
+    if (!empName.trim()) return;
+    setEmpSaving(true);
+    try {
+      await createEmployee(empName.trim());
+      showToast({ type: 'success', title: 'Berhasil', message: 'Karyawan ditambahkan' });
+      loadEmployees();
+      setEmpView('list');
+      setEmpName('');
+    } catch (err) {
+      showToast({ type: 'error', title: 'Gagal', message: err.message });
+    } finally {
+      setEmpSaving(false);
+    }
+  };
+
+  const handleEmpUpdate = async () => {
+    if (!empName.trim() || !empEditId) return;
+    setEmpSaving(true);
+    try {
+      await updateEmployee(empEditId, empName.trim());
+      showToast({ type: 'success', title: 'Berhasil', message: 'Karyawan diperbarui' });
+      loadEmployees();
+      setEmpView('list');
+      setEmpEditId(null);
+      setEmpName('');
+    } catch (err) {
+      showToast({ type: 'error', title: 'Gagal', message: err.message });
+    } finally {
+      setEmpSaving(false);
+    }
+  };
+
+  const handleEmpDelete = async () => {
+    if (!empEditId) return;
+    setEmpSaving(true);
+    try {
+      await deleteEmployee(empEditId);
+      showToast({ type: 'success', title: 'Berhasil', message: 'Karyawan dihapus' });
+      loadEmployees();
+      setEmpView('list');
+      setEmpEditId(null);
+      setEmpName('');
+    } catch (err) {
+      showToast({ type: 'error', title: 'Gagal menghapus', message: err.message });
+    } finally {
+      setEmpSaving(false);
+    }
+  };
 
   const phaseOptions = Object.keys(phases);
   const statusOptions = taskForm.phase ? phases[taskForm.phase] ?? [] : [];
@@ -240,14 +317,23 @@ export default function SubmitPage() {
             Informasi Umum
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <Select
-              label="Employee"
-              placeholder="Pilih karyawan"
-              options={employees.map((emp) => ({ value: emp.id, label: emp.name }))}
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              error={formErrors.employeeId}
-            />
+            <div>
+              <Select
+                label="Employee"
+                placeholder="Pilih karyawan"
+                options={employees.map((emp) => ({ value: emp.id, label: emp.name }))}
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                error={formErrors.employeeId}
+              />
+              <button
+                type="button"
+                onClick={openEmpModal}
+                className="mt-1 text-xs text-slate-500 hover:text-blue-600 hover:underline"
+              >
+                ⚙ Kelola Karyawan
+              </button>
+            </div>
             <DatePicker
               label="Tanggal"
               value={date}
@@ -391,6 +477,94 @@ export default function SubmitPage() {
           </div>
         </section>
       </div>
+
+      <Modal
+        open={empModalOpen}
+        onClose={() => setEmpModalOpen(false)}
+        title={
+          empView === 'list'
+            ? 'Kelola Karyawan'
+            : empView === 'add'
+              ? 'Tambah Karyawan'
+              : 'Edit Karyawan'
+        }
+        size="sm"
+        footer={
+          empView === 'list' ? (
+            <Button type="button" onClick={() => { setEmpView('add'); setEmpName(''); }}>
+              + Tambah Karyawan
+            </Button>
+          ) : (
+            <>
+              {empView === 'edit' && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  loading={empSaving}
+                  onClick={handleEmpDelete}
+                >
+                  Hapus Karyawan
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEmpView('list')}
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                loading={empSaving}
+                onClick={empView === 'add' ? handleEmpCreate : handleEmpUpdate}
+              >
+                Simpan
+              </Button>
+            </>
+          )
+        }
+      >
+        {empView === 'list' ? (
+          <Table>
+            <THead>
+              <Tr>
+                <Th className="w-10">#</Th>
+                <Th>Nama</Th>
+                <Th className="w-20"></Th>
+              </Tr>
+            </THead>
+            <TBody>
+              {employees.map((emp, i) => (
+                <Tr key={emp.id}>
+                  <Td>{i + 1}</Td>
+                  <Td>{emp.name}</Td>
+                  <Td>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEmpView('edit');
+                        setEmpEditId(emp.id);
+                        setEmpName(emp.name);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Td>
+                </Tr>
+              ))}
+            </TBody>
+          </Table>
+        ) : (
+          <Input
+            label="Nama Karyawan"
+            placeholder="Masukkan nama"
+            value={empName}
+            onChange={(e) => setEmpName(e.target.value)}
+          />
+        )}
+      </Modal>
     </div>
   );
 }
