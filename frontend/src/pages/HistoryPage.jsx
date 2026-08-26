@@ -16,7 +16,7 @@ import {
   Tr,
   useToast,
 } from '../components/ui';
-import { getEmployees, getHistory, getTaskHistory, exportHistory } from '../api/lsppt';
+import { getEmployees, getHistory, getTaskHistory, exportHistory, getPhases, updateTaskProgress } from '../api/lsppt';
 
 const STATUS_VARIANT = {
   Completed: 'success',
@@ -119,6 +119,16 @@ function DetailModal({ open, onClose, row }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [phases, setPhases] = useState({});
+  const [showUpdate, setShowUpdate] = useState(false);
+  const [updatePhase, setUpdatePhase] = useState('');
+  const [updateStatus, setUpdateStatus] = useState('');
+  const [updateDate, setUpdateDate] = useState('');
+  const [updateErrors, setUpdateErrors] = useState({});
+  const [updating, setUpdating] = useState(false);
+
+  const { showToast } = useToast();
+
   function loadHistory() {
     if (!row) return;
     setLoading(true);
@@ -132,8 +142,63 @@ function DetailModal({ open, onClose, row }) {
   useEffect(() => {
     if (!open || !row) return undefined;
     loadHistory();
+    setUpdatePhase(row.phase);
+    setUpdateStatus(row.status);
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    setUpdateDate(`${y}-${m}-${d}`);
+    setShowUpdate(false);
+    setUpdateErrors({});
     return () => {};
   }, [open, row]);
+
+  useEffect(() => {
+    if (!open) return;
+    getPhases()
+      .then((res) => setPhases(res.data))
+      .catch(() => {});
+  }, [open]);
+
+  const statusOptions = updatePhase ? phases[updatePhase] ?? [] : [];
+
+  function handlePhaseChange(e) {
+    const val = e.target.value;
+    setUpdatePhase(val);
+    if (val && !phases[val]?.includes(updateStatus)) {
+      setUpdateStatus('');
+    }
+  }
+
+  function handleSubmitUpdate() {
+    const errs = {};
+    if (!updatePhase) errs.phase = 'Pilih phase';
+    if (!updateStatus) errs.status = 'Pilih status';
+    if (!updateDate) errs.date = 'Pilih tanggal';
+    setUpdateErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setUpdating(true);
+    updateTaskProgress(row.task_id, {
+      phase: updatePhase,
+      status: updateStatus,
+      date: updateDate,
+    })
+      .then(() => {
+        showToast({ type: 'success', title: 'Berhasil', message: 'Progress berhasil diperbarui' });
+        setShowUpdate(false);
+        loadHistory();
+      })
+      .catch((err) => {
+        showToast({
+          type: 'error',
+          title: 'Gagal',
+          message: err.status === 409 ? 'Progress untuk tanggal ini sudah ada' : (err.message || 'Terjadi kesalahan'),
+        });
+      })
+      .finally(() => setUpdating(false));
+  }
 
   const lastUpdated = entries?.length ? entries[entries.length - 1].date : null;
 
@@ -239,7 +304,53 @@ function DetailModal({ open, onClose, row }) {
             )}
           </div>
 
-          <div className="mt-6 flex justify-end border-t border-slate-100 pt-4">
+          {showUpdate && (
+            <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-blue-600">
+                Update Progress
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Select
+                  label="Phase"
+                  placeholder="Pilih phase"
+                  options={Object.keys(phases).map((p) => ({ value: p, label: p }))}
+                  value={updatePhase}
+                  onChange={handlePhaseChange}
+                  error={updateErrors.phase}
+                />
+                <Select
+                  label="Status"
+                  placeholder={updatePhase ? 'Pilih status' : 'Pilih phase dulu'}
+                  options={statusOptions.map((s) => ({ value: s, label: s }))}
+                  value={updateStatus}
+                  onChange={(e) => { setUpdateStatus(e.target.value); setUpdateErrors((p) => ({ ...p, status: undefined })); }}
+                  disabled={!updatePhase}
+                  error={updateErrors.status}
+                />
+                <DatePicker
+                  label="Tanggal"
+                  value={updateDate}
+                  onChange={(e) => { setUpdateDate(e.target.value); setUpdateErrors((p) => ({ ...p, date: undefined })); }}
+                  error={updateErrors.date}
+                />
+              </div>
+              <div className="mt-3 flex justify-end gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowUpdate(false)}>
+                  Batal
+                </Button>
+                <Button type="button" size="sm" loading={updating} onClick={handleSubmitUpdate}>
+                  Simpan Progress
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-4">
+            {!showUpdate && (
+              <Button variant="primary" onClick={() => setShowUpdate(true)}>
+                Update Progress
+              </Button>
+            )}
             <Button variant="outline" onClick={onClose}>
               Tutup
             </Button>
