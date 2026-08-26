@@ -60,7 +60,16 @@
 - [ ] Setup environment variables
 
 ### UI Components
-- j
+- [ ] Button
+- [ ] Input
+- [ ] Select
+- [ ] DatePicker
+- [ ] Modal
+- [ ] Table
+- [ ] Badge
+- [ ] Toast
+- [ ] Loading
+- [ ] Empty State
 
 ### Submit LSPPT
 - [ ] Halaman `/submit`
@@ -85,28 +94,28 @@
 ## Bagas — Frontend History & Testing
 
 ### History
-- [ ] Halaman `/history`
-- [ ] Employee filter
-- [ ] From date
-- [ ] To date
-- [ ] Search
-- [ ] History table
-- [ ] Loading state
-- [ ] Empty state
-- [ ] Error state
+- [x] Halaman `/history`
+- [x] Employee filter
+- [x] From date
+- [x] To date
+- [x] Search
+- [x] History table
+- [x] Loading state
+- [x] Empty state
+- [x] Error state
 
 ### Task Progress
-- [ ] Task clickable
-- [ ] Task detail
-- [ ] Progress timeline
-- [ ] Tampilkan perubahan Phase/Status per tanggal
-- [ ] Integrasi `/tasks/:id/history`
+- [x] Task clickable
+- [x] Task detail
+- [x] Progress timeline
+- [x] Tampilkan perubahan Phase/Status per tanggal
+- [x] Integrasi `/tasks/:id/history`
 
 ### Export
-- [ ] Tombol Export Excel
-- [ ] Kirim filter Employee & Date
-- [ ] Download file `.xlsx`
-- [ ] Integrasi `/history/export`
+- [x] Tombol Export Excel
+- [x] Kirim filter Employee & Date
+- [x] Download file `.xlsx`
+- [x] Integrasi `/history/export`
 
 ### Integration Testing
 - [ ] Test Submit → Database → History
