@@ -13,7 +13,7 @@ test.describe('SubmitPage - Form Fill & Save', () => {
     }
   });
 
-  test('fill form with employee Lundy, add task, and save LSPPT', async ({ page }) => {
+  test('Test form submission', async ({ page }) => {
     await page.goto('/submit', { waitUntil: 'networkidle' });
 
     await page.getByLabel('Employee').selectOption({ label: 'Lundy' });
