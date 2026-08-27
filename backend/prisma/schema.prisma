@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  tasks     Task[]
+
+  @@map("employees")
+}
+
+model Task {
+  id            Int     @id @default(autoincrement())
+  employeeId    Int     @map("employee_id")
+  clickupTaskId String? @map("clickup_task_id") @db.VarChar(100)
+  title         String  @db.VarChar(255)
+  clickupUrl    String? @map("clickup_url") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  employee Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  progress TaskProgress[]
+
+  @@unique([employeeId, clickupTaskId])
+  @@map("tasks")
+}
+
+model TaskProgress {
+  id        Int      @id @default(autoincrement())
+  taskId    Int      @map("task_id")
+  date      DateTime @db.Date
+  phase     String   @db.VarChar(10)
+  status    String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, date])
+  @@index([date])
+  @@map("task_progress")
+}
