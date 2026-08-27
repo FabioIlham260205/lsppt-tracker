@@ -67,6 +67,10 @@ export function deleteEmployee(id) {
   return request(api.delete(`/employees/${id}`));
 }
 
+export function getEmployeeTaskCount(id) {
+  return request(api.get(`/employees/${id}/task-count`));
+}
+
 export function updateTaskProgress(taskId, { phase, status, date }) {
   return request(api.post(`/tasks/${taskId}/progress`, { phase, status, date }));
 }

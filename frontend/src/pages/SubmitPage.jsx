@@ -24,6 +24,7 @@ import {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  getEmployeeTaskCount,
 } from '../api/lsppt.js';
 
 const CLICKUP_ID_PATTERN = /\/([a-z0-9]+)\/?$/i;
@@ -72,6 +73,11 @@ export default function SubmitPage() {
   const [empEditId, setEmpEditId] = useState(null);
   const [empName, setEmpName] = useState('');
   const [empSaving, setEmpSaving] = useState(false);
+
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteTaskCount, setDeleteTaskCount] = useState(0);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,18 +151,32 @@ export default function SubmitPage() {
 
   const handleEmpDelete = async () => {
     if (!empEditId) return;
-    setEmpSaving(true);
     try {
-      await deleteEmployee(empEditId);
+      const res = await getEmployeeTaskCount(empEditId);
+      setDeleteTarget({ id: empEditId, name: empName });
+      setDeleteTaskCount(res.count);
+      setDeleteConfirmOpen(true);
+    } catch (err) {
+      showToast({ type: 'error', title: 'Gagal', message: err.message });
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      await deleteEmployee(deleteTarget.id);
       showToast({ type: 'success', title: 'Berhasil', message: 'Karyawan dihapus' });
       loadEmployees();
       setEmpView('list');
       setEmpEditId(null);
       setEmpName('');
+      setDeleteConfirmOpen(false);
+      setDeleteTarget(null);
     } catch (err) {
       showToast({ type: 'error', title: 'Gagal menghapus', message: err.message });
     } finally {
-      setEmpSaving(false);
+      setDeleteLoading(false);
     }
   };
 
@@ -566,6 +586,32 @@ export default function SubmitPage() {
             value={empName}
             onChange={(e) => setEmpName(e.target.value)}
           />
+        )}
+      </Modal>
+
+      <Modal
+        open={deleteConfirmOpen}
+        onClose={() => { setDeleteConfirmOpen(false); setDeleteTarget(null); }}
+        title="Hapus Karyawan"
+        size="sm"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => { setDeleteConfirmOpen(false); setDeleteTarget(null); }}>
+              Batal
+            </Button>
+            <Button variant="danger" loading={deleteLoading} onClick={handleConfirmDelete}>
+              Hapus
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-slate-700">
+          Yakin ingin menghapus <span className="font-semibold">{deleteTarget?.name}</span>?
+        </p>
+        {deleteTaskCount > 0 && (
+          <p className="mt-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
+            Karyawan ini memiliki <span className="font-semibold">{deleteTaskCount} task</span>. Semua task dan progress-nya juga akan dihapus secara permanen.
+          </p>
         )}
       </Modal>
     </div>
