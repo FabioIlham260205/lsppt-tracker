@@ -1,0 +1,12 @@
+{
+  "name": "lsppt-tracker-tests",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:history": "npx playwright test tests/history-filters.spec.js tests/history-table-modal.spec.js",
+    "test:report": "npx playwright show-report tests/html-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}
