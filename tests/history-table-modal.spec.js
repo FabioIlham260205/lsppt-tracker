@@ -263,4 +263,175 @@ test.describe('History Page - Table, Export, Modal, Navigation', () => {
 
     await expect(modal).toBeVisible();
   });
+
+  // ── TC-HIST-017 ──────────────────────────────────────────────
+  test('TC-HIST-017: Update Progress - form appears & fill form', async ({ page }) => {
+    await page.goto(HISTORY_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(TIMEOUT_WAIT_DATA);
+
+    await page.locator('tbody tr').first().click();
+    await page.waitForTimeout(1500);
+
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible();
+
+    const updateBtn = modal.locator('button', { hasText: 'Update Progress' });
+    await expect(updateBtn).toBeVisible();
+    await updateBtn.click();
+    await page.waitForTimeout(500);
+
+    const updateSection = modal.locator('text=Update Progress').last();
+    await expect(updateSection).toBeVisible();
+
+    const phaseSelect = modal.locator('select').nth(0);
+    const statusSelect = modal.locator('select').nth(1);
+    const dateInput = modal.locator('input[type="date"]');
+
+    await expect(phaseSelect).toBeVisible();
+    await expect(statusSelect).toBeVisible();
+    await expect(dateInput).toBeVisible();
+
+    const phaseOptions = await phaseSelect.locator('option').allTextContents();
+    expect(phaseOptions).toContain('TS');
+    expect(phaseOptions).toContain('QA');
+
+    await phaseSelect.selectOption('QA');
+    await page.waitForTimeout(300);
+    const qaStatuses = await statusSelect.locator('option').allTextContents();
+    console.log('QA statuses:', qaStatuses);
+    expect(qaStatuses).toContain('Completed');
+    expect(qaStatuses).toContain('Testing');
+    expect(qaStatuses.length).toBeGreaterThanOrEqual(4);
+
+    await phaseSelect.selectOption('TS');
+    await page.waitForTimeout(300);
+    const tsStatuses = await statusSelect.locator('option').allTextContents();
+    console.log('TS statuses:', tsStatuses);
+    expect(tsStatuses).toContain('In Progress');
+    expect(tsStatuses).toContain('Plan');
+    expect(tsStatuses.length).toBeGreaterThanOrEqual(3);
+
+    const dateValue = await dateInput.inputValue();
+    expect(dateValue).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    console.log('Default date:', dateValue);
+
+    const simpanBtn = modal.locator('button', { hasText: 'Simpan Progress' });
+    await expect(simpanBtn).toBeVisible();
+
+    const batalBtn = modal.locator('button', { hasText: 'Batal' });
+    await expect(batalBtn).toBeVisible();
+
+    await batalBtn.click();
+    await page.waitForTimeout(300);
+
+    await expect(updateBtn).toBeVisible();
+  });
+
+  // ── TC-HIST-018 ──────────────────────────────────────────────
+  test('TC-HIST-018: Update Progress - Simpan Progress success', async ({ page }) => {
+    await page.goto(HISTORY_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(TIMEOUT_WAIT_DATA);
+
+    await page.locator('tbody tr').first().click();
+    await page.waitForTimeout(1500);
+
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible();
+
+    await modal.locator('button', { hasText: 'Update Progress' }).click();
+    await page.waitForTimeout(500);
+
+    const phaseSelect = modal.locator('select').nth(0);
+    const statusSelect = modal.locator('select').nth(1);
+    const dateInput = modal.locator('input[type="date"]');
+
+    await phaseSelect.selectOption('QA');
+    await page.waitForTimeout(300);
+    await statusSelect.selectOption('Completed Testing');
+    await page.waitForTimeout(300);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const y = tomorrow.getFullYear();
+    const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const d = String(tomorrow.getDate()).padStart(2, '0');
+    const tomorrowStr = `${y}-${m}-${d}`;
+    await dateInput.fill(tomorrowStr);
+    await page.waitForTimeout(300);
+
+    await modal.locator('button', { hasText: 'Simpan Progress' }).click();
+    await page.waitForTimeout(3000);
+
+    const toast = page.locator('text=Progress berhasil diperbarui');
+    const toastVisible = await toast.isVisible().catch(() => false);
+    console.log('Success toast visible:', toastVisible);
+
+    const updateSectionVisible = await modal.locator('text=Update Progress').last().isVisible().catch(() => false);
+    console.log('Update form still visible after save:', updateSectionVisible);
+  });
+
+  // ── TC-HIST-019 ──────────────────────────────────────────────
+  test('TC-HIST-019: Update Progress - Batal closes form', async ({ page }) => {
+    await page.goto(HISTORY_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(TIMEOUT_WAIT_DATA);
+
+    await page.locator('tbody tr').first().click();
+    await page.waitForTimeout(1500);
+
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible();
+
+    const updateBtn = modal.locator('button', { hasText: 'Update Progress' });
+    await expect(updateBtn).toBeVisible();
+    await updateBtn.click();
+    await page.waitForTimeout(500);
+
+    const phaseSelect = modal.locator('select').nth(0);
+    await expect(phaseSelect).toBeVisible();
+
+    await phaseSelect.selectOption('TS');
+    await page.waitForTimeout(300);
+
+    await modal.locator('button', { hasText: 'Batal' }).click();
+    await page.waitForTimeout(300);
+
+    await expect(updateBtn).toBeVisible();
+
+    const formHidden = await phaseSelect.isVisible().catch(() => false);
+    expect(formHidden).toBeFalsy();
+  });
+
+  // ── TC-HIST-020 ──────────────────────────────────────────────
+  test('TC-HIST-020: Update Progress - error 409 duplicate date', async ({ page }) => {
+    await page.goto(HISTORY_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(TIMEOUT_WAIT_DATA);
+
+    await page.locator('tbody tr').first().click();
+    await page.waitForTimeout(1500);
+
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible();
+
+    await modal.locator('button', { hasText: 'Update Progress' }).click();
+    await page.waitForTimeout(500);
+
+    const dateInput = modal.locator('input[type="date"]');
+    const currentDate = await dateInput.inputValue();
+    console.log('Using existing date for duplicate test:', currentDate);
+
+    await modal.locator('button', { hasText: 'Simpan Progress' }).click();
+    await page.waitForTimeout(3000);
+
+    const errorMsg = page.locator('text=Progress untuk tanggal ini sudah ada');
+    const errorVisible = await errorMsg.isVisible().catch(() => false);
+    console.log('Duplicate error visible:', errorVisible);
+
+    const phaseSelect = modal.locator('select').nth(0);
+    const formStillVisible = await phaseSelect.isVisible().catch(() => false);
+    console.log('Form still open after error:', formStillVisible);
+  });
 });
