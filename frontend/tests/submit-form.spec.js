@@ -2,18 +2,17 @@ import { test, expect } from '@playwright/test';
 
 const API = 'http://localhost:3000/api';
 
-test.describe('SubmitPage - Form Fill & Save', () => {
-  test.beforeAll(async ({ request }) => {
-    const res = await request.get(`${API}/history`);
-    const { data = [] } = await res.json();
-    for (const row of data) {
-      if (row.clickup_task_id === '86d412pzq') {
-        await request.delete(`${API}/tasks/${row.task_id}`);
-      }
+test.beforeAll(async ({ request }) => {
+  const res = await request.get(`${API}/history`);
+  const { data = [] } = await res.json();
+  for (const row of data) {
+    if (row.clickup_task_id === '86d412pzq') {
+      await request.delete(`${API}/tasks/${row.task_id}`);
     }
-  });
+  }
+});
 
-  test('Test form submission', async ({ page }) => {
+test('Test form submission', async ({ page }) => {
     await page.goto('/submit', { waitUntil: 'networkidle' });
 
     await page.getByLabel('Employee').selectOption({ label: 'Lundy' });
@@ -39,4 +38,30 @@ test.describe('SubmitPage - Form Fill & Save', () => {
     await expect(toast).toBeVisible({ timeout: 10000 });
     await expect(toast).toContainText('Berhasil');
   });
-});
+
+  test('Manage employee', async ({ page }) => {
+    await page.goto('/submit', { waitUntil: 'networkidle' });
+
+    const empsRes = await page.evaluate(async () => {
+      const res = await fetch('http://localhost:3000/api/employees');
+      return res.json();
+    });
+    const argi = empsRes.data?.find((e) => e.name === 'Argi');
+    if (argi) {
+      await page.evaluate((id) =>
+        fetch(`http://localhost:3000/api/employees/${id}`, { method: 'DELETE' })
+      , argi.id);
+    }
+
+    await page.getByRole('button', { name: /Kelola Karyawan/ }).click();
+
+    await page.getByRole('button', { name: '+ Tambah Karyawan' }).click();
+
+    await page.getByLabel('Nama Karyawan').fill('Argi');
+
+    await page.getByRole('button', { name: 'Simpan' }).click();
+
+    const toast = page.getByRole('alert');
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    await expect(toast).toContainText('Berhasil');
+  });
