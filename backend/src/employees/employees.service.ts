@@ -51,18 +51,19 @@ export class EmployeesService {
     return updated;
   }
 
-  async remove(id: number) {
+  async taskCount(id: number) {
     const employee = await this.prisma.employee.findUnique({ where: { id } });
     if (!employee) {
       throw new NotFoundException('Employee not found');
     }
-    const taskCount = await this.prisma.task.count({
-      where: { employeeId: id },
-    });
-    if (taskCount > 0) {
-      throw new ConflictException(
-        'Cannot delete employee with existing tasks',
-      );
+    const count = await this.prisma.task.count({ where: { employeeId: id } });
+    return { count };
+  }
+
+  async remove(id: number) {
+    const employee = await this.prisma.employee.findUnique({ where: { id } });
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
     }
     await this.prisma.employee.delete({ where: { id } });
     return { message: 'Employee deleted successfully' };

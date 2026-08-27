@@ -30,6 +30,11 @@ export class EmployeesController {
     return this.employeesService.update(id, dto);
   }
 
+  @Get(':id/task-count')
+  taskCount(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.taskCount(id);
+  }
+
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.employeesService.remove(id);
