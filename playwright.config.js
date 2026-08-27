@@ -1,6 +1,6 @@
-const { defineConfig } = require('@playwright/test');
+import { defineConfig } from '@playwright/test';
 
-module.exports = defineConfig({
+export default defineConfig({
   testDir: './tests',
   testMatch: '*.spec.js',
   timeout: 60000,
@@ -17,10 +17,7 @@ module.exports = defineConfig({
     browserName: 'chromium',
     headless: true,
     viewport: { width: 1280, height: 800 },
-    video: {
-      mode: 'on',
-      outputDir: 'tests/videos',
-    },
+    video: 'off',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     actionTimeout: 10000,
