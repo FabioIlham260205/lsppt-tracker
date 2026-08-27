@@ -43,3 +43,25 @@ Laporan Status Progress Pekerjaan Karyawan
 
 ### Export Excel
 - Klik **Export Excel** → file `.xlsx` terunduh
+
+---
+
+### Tech Stack
+
+- Backend: NestJS 11 + Prisma + PostgreSQL 16
+- Frontend: React 19 + Vite + Tailwind CSS 4
+- Testing: Jest (backend) + Vitest (frontend)
+
+### Cara Menjalankan
+
+1. Pastikan Docker sudah terinstall
+2. Jalankan:
+   ```bash
+   docker compose -f docker-compose.dev.yml up -d
+3. Buka http://localhost:5173
+Database
+#### Reset database + seed
+docker compose -f docker-compose.dev.yml exec backend npx prisma migrate reset --force
+
+#### Seed ulang
+docker compose -f docker-compose.dev.yml exec backend npx prisma db seed
