@@ -19,3 +19,4 @@ Thumbs.db
 .vscode/
 
 test-results/
+tests/html-report/
