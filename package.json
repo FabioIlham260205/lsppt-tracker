@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test": "npx playwright test",
-    "test:history": "npx playwright test tests/history-filters.spec.js tests/history-table-modal.spec.js",
+    "test:history": "npx playwright test tests/history-full-flow.spec.js",
     "test:report": "npx playwright show-report tests/html-report"
   },
   "devDependencies": {
