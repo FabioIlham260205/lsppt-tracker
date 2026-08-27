@@ -126,7 +126,7 @@ test.describe('Submit Page - Form & Employee CRUD', () => {
 
     await page.getByRole('button', { name: 'Hapus Karyawan' }).click();
 
-    const confirmModal = page.getByRole('dialog', { name: 'Hapus Karyawan' });
+    const confirmModal = page.locator('[role="dialog"]').filter({ hasText: 'Yakin ingin menghapus' });
     await expect(confirmModal).toBeVisible();
     await expect(confirmModal).toContainText('Argi');
     await confirmModal.getByRole('button', { name: 'Hapus' }).click();
