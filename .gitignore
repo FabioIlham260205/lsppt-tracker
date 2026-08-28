@@ -17,3 +17,6 @@ build/
 Thumbs.db
 .idea/
 .vscode/
+
+test-results/
+tests/html-report/
