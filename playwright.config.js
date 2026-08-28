@@ -17,7 +17,10 @@ export default defineConfig({
     browserName: 'chromium',
     headless: true,
     viewport: { width: 1920, height: 1080 },
-    video: 'on',
+    video: {
+      mode: 'on',
+      size: { width: 1920, height: 1080 },
+    },
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     actionTimeout: 10000,
